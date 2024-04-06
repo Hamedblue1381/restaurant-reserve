@@ -1,0 +1,1054 @@
+definitions:
+  api.ErrorResponse:
+    properties:
+      error:
+        example: Error message
+        type: string
+    type: object
+  api.LoginDetails:
+    properties:
+      email:
+        description: Telephone string `json:"telephone" example:"09211212121"`
+        example: user@example.com
+        type: string
+      password:
+        example: password123
+        type: string
+    type: object
+  api.LoginResponse:
+    properties:
+      message:
+        example: Login successful
+        type: string
+      token:
+        example: ""
+        type: string
+    type: object
+  api.RegisterDetails:
+    properties:
+      email:
+        example: john.doe@example.com
+        type: string
+      name:
+        example: John Doe
+        type: string
+      password:
+        example: securePassword123
+        type: string
+      role:
+        example: user
+        type: string
+      telephone:
+        example: 123-456-7890
+        type: string
+    type: object
+  api.RegisterResponse:
+    properties:
+      message:
+        example: User registered successfully
+        type: string
+    type: object
+  models.Category:
+    properties:
+      foods:
+        description: Foods relationship
+        items:
+          $ref: '#/definitions/models.Food'
+        type: array
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  models.Food:
+    properties:
+      category:
+        allOf:
+        - $ref: '#/definitions/models.Category'
+        description: Category relationship
+      categoryID:
+        description: Foreign key for Category
+        type: integer
+      id:
+        type: integer
+      meal_type:
+        allOf:
+        - $ref: '#/definitions/models.MealType'
+        description: MealType relationship
+      mealTypeID:
+        description: Foreign key for MealType
+        type: integer
+      name:
+        type: string
+      quanity:
+        type: string
+    type: object
+  models.MealType:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  models.Reservation:
+    properties:
+      date:
+        type: string
+      food:
+        allOf:
+        - $ref: '#/definitions/models.Food'
+        description: Food relationship
+      foodID:
+        description: Foreign key for Food
+        type: integer
+      id:
+        type: integer
+      side:
+        allOf:
+        - $ref: '#/definitions/models.Sides'
+        description: Sides relationship
+      sideID:
+        description: Foreign key for Sides
+        type: integer
+      user:
+        allOf:
+        - $ref: '#/definitions/models.User'
+        description: User relationship
+      userID:
+        description: Foreign key for User
+        type: integer
+    type: object
+  models.Sides:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      quantity:
+        type: string
+    type: object
+  models.User:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      password:
+        type: string
+      role:
+        type: string
+      telephone:
+        type: string
+    type: object
+  v1.ErrorResponse:
+    properties:
+      error:
+        example: Description of the error occurred
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new user account with the provided details. Upon successful
+        creation, the user can log in with their credentials.
+      parameters:
+      - description: Register Credentials
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/api.RegisterDetails'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Confirmation of successful registration.
+          schema:
+            $ref: '#/definitions/api.RegisterResponse'
+        "400":
+          description: The request was formatted incorrectly or missing required fields.
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal server error, unable to process the request.
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Register a new user
+      tags:
+      - authentication
+  /auth/signin:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user by their email and password, returning a JWT
+        token for authorized access to protected endpoints if successful.
+      parameters:
+      - description: Login Credentials
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/api.LoginDetails'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: An object containing a JWT token for authentication and a message
+            indicating successful login.
+          schema:
+            $ref: '#/definitions/api.LoginResponse'
+        "400":
+          description: The request was formatted incorrectly or missing required fields.
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "401":
+          description: Authentication failed due to invalid login credentials.
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "404":
+          description: The specified user was not found in the system.
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal server error, unable to process the request.
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: User Login
+      tags:
+      - authentication
+  /food:
+    get:
+      description: Retrieves a list of all foods in the system.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: An array of food objects.
+          schema:
+            items:
+              $ref: '#/definitions/models.Food'
+            type: array
+        "500":
+          description: Internal server error while fetching foods.
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get All Foods
+      tags:
+      - food
+    post:
+      consumes:
+      - application/json
+      description: Adds a new Food to the system with the provided details.
+      parameters:
+      - description: Food Details
+        in: body
+        name: food
+        required: true
+        schema:
+          $ref: '#/definitions/models.Food'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: The created Food's details, including their unique identifier.
+          schema:
+            $ref: '#/definitions/models.Food'
+        "400":
+          description: Invalid input format for Food.
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Internal server error while creating the food.
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Create a New Food
+      tags:
+      - food
+  /food/{id}:
+    delete:
+      description: Removes a food dish from the system by their unique identifier.
+      parameters:
+      - description: food ID
+        format: int64
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Food successfully deleted, no content to return.
+        "400":
+          description: Invalid food ID format.
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Internal server error while deleting the food.
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Delete a food
+      tags:
+      - food
+    get:
+      description: Retrieves details of a single food dish by their unique identifier.
+      parameters:
+      - description: food ID
+        format: int64
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: The details of the food including ID, name, quantity, category,
+            mealtype.
+          schema:
+            $ref: '#/definitions/models.Food'
+        "400":
+          description: Invalid food ID format.
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "404":
+          description: Food not found with the specified ID.
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get a Single food Dish
+      tags:
+      - food
+    put:
+      consumes:
+      - application/json
+      description: Updates the details of an existing food identified by their ID.
+      parameters:
+      - description: Food ID
+        format: int64
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated food Details
+        in: body
+        name: food
+        required: true
+        schema:
+          $ref: '#/definitions/models.Food'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: The updated food's details.
+          schema:
+            $ref: '#/definitions/models.Food'
+        "400":
+          description: Invalid input format for user details or invalid food ID.
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Internal server error while updating the food.
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Update a food
+      tags:
+      - food
+  /me:
+    get:
+      description: Retrieves the details of the currently authenticated user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: The details of the currently authenticated user.
+          schema:
+            $ref: '#/definitions/models.User'
+        "404":
+          description: User not found.
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get my profile
+      tags:
+      - user
+  /mealtype:
+    post:
+      consumes:
+      - application/json
+      description: Adds a new MealType to the system with the provided details.
+      parameters:
+      - description: MealType Details
+        in: body
+        name: mealtype
+        required: true
+        schema:
+          $ref: '#/definitions/models.MealType'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: The created MealType's details, including their unique identifier.
+          schema:
+            $ref: '#/definitions/models.MealType'
+        "400":
+          description: Invalid input format for MealType.
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Internal server error while creating the mealtype.
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Create a New MealType
+      tags:
+      - mealtype
+  /mealtype/{id}:
+    delete:
+      description: Removes a mealtype dish from the system by their unique identifier.
+      parameters:
+      - description: mealtype ID
+        format: int64
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: MealType successfully deleted, no content to return.
+        "400":
+          description: Invalid mealtype ID format.
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Internal server error while deleting the mealtype.
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Delete a mealtype
+      tags:
+      - mealtype
+    get:
+      description: Retrieves details of a single mealtype dish by their unique identifier.
+      parameters:
+      - description: mealtype ID
+        format: int64
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: The details of the mealtype including ID, name, quantity, category,
+            mealtype.
+          schema:
+            $ref: '#/definitions/models.MealType'
+        "400":
+          description: Invalid mealtype ID format.
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "404":
+          description: MealType not found with the specified ID.
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get a Single mealtype Dish
+      tags:
+      - mealtype
+    put:
+      consumes:
+      - application/json
+      description: Updates the details of an existing mealtype identified by their
+        ID.
+      parameters:
+      - description: MealType ID
+        format: int64
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated mealtype Details
+        in: body
+        name: mealtype
+        required: true
+        schema:
+          $ref: '#/definitions/models.MealType'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: The updated mealtype's details.
+          schema:
+            $ref: '#/definitions/models.MealType'
+        "400":
+          description: Invalid input format for user details or invalid mealtype ID.
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Internal server error while updating the mealtype.
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Update a mealtype
+      tags:
+      - mealtype
+  /mealtypes:
+    get:
+      description: Retrieves a list of all mealtypes in the system.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: An array of mealtype objects.
+          schema:
+            items:
+              $ref: '#/definitions/models.MealType'
+            type: array
+        "500":
+          description: Internal server error while fetching mealtypes.
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get All MealTypes
+      tags:
+      - mealtype
+  /reservation:
+    post:
+      consumes:
+      - application/json
+      description: Create a new reservation
+      parameters:
+      - description: Reservation details
+        in: body
+        name: reservation
+        required: true
+        schema:
+          $ref: '#/definitions/models.Reservation'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: The created reservation
+          schema:
+            $ref: '#/definitions/models.Reservation'
+        "400":
+          description: Invalid request format
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "403":
+          description: User must be logged in to update a reservation
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Create a reservation
+      tags:
+      - reservation
+  /reservation/{id}:
+    delete:
+      description: Delete a reservation by ID
+      parameters:
+      - description: Reservation ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No content
+        "400":
+          description: Invalid reservation ID format
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "403":
+          description: User must be logged in to update a reservation
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "404":
+          description: Reservation not found
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Delete a reservation
+      tags:
+      - reservation
+    get:
+      description: Retrieve details of a single reservation by its unique identifier
+      parameters:
+      - description: Reservation ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: The reservation details
+          schema:
+            $ref: '#/definitions/models.Reservation'
+        "400":
+          description: Invalid reservation ID format
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "403":
+          description: User must be logged in to update a reservation
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "404":
+          description: Reservation not found
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get a single reservation
+      tags:
+      - reservation
+    put:
+      consumes:
+      - application/json
+      description: Update an existing reservation by ID
+      parameters:
+      - description: Reservation ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Reservation details
+        in: body
+        name: reservation
+        required: true
+        schema:
+          $ref: '#/definitions/models.Reservation'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: The updated reservation
+          schema:
+            $ref: '#/definitions/models.Reservation'
+        "400":
+          description: Invalid request format
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "403":
+          description: User must be logged in to update a reservation
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "404":
+          description: Reservation not found
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Update a reservation
+      tags:
+      - reservation
+  /reservations:
+    get:
+      description: List reservations based on provided start and end dates
+      parameters:
+      - description: 'Start date (format: yyyy-mm-dd)'
+        in: query
+        name: start_date
+        type: string
+      - description: 'End date (format: yyyy-mm-dd)'
+        in: query
+        name: end_date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of reservations
+          schema:
+            items:
+              $ref: '#/definitions/models.Reservation'
+            type: array
+        "400":
+          description: Invalid date format
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "403":
+          description: User must be logged in to update a reservation
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: get reservations
+      tags:
+      - reservation
+  /sides:
+    get:
+      description: Retrieves a list of all side dishes in the system.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: An array of sides objects.
+          schema:
+            items:
+              $ref: '#/definitions/models.Sides'
+            type: array
+        "500":
+          description: Internal server error while fetching sides.
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get All Sides
+      tags:
+      - sides
+    post:
+      consumes:
+      - application/json
+      description: Adds a new side dish to the system with the provided details.
+      parameters:
+      - description: Sides Details
+        in: body
+        name: sides
+        required: true
+        schema:
+          $ref: '#/definitions/models.Sides'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: The created Side's details, including their unique identifier.
+          schema:
+            $ref: '#/definitions/models.Sides'
+        "400":
+          description: Invalid input format for Sides.
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Internal server error while creating the sides.
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Create a New Sides
+      tags:
+      - sides
+  /sides/{id}:
+    delete:
+      description: Removes a side dish from the system by their unique identifier.
+      parameters:
+      - description: Sides ID
+        format: int64
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Side Dish successfully deleted, no content to return.
+        "400":
+          description: Invalid sides ID format.
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Internal server error while deleting the sides.
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Delete a Side Dish
+      tags:
+      - sides
+    get:
+      description: Retrieves details of a single side dish by their unique identifier.
+      parameters:
+      - description: Sides ID
+        format: int64
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: The details of the sides including ID, name, quantity.
+          schema:
+            $ref: '#/definitions/models.Sides'
+        "400":
+          description: Invalid sides ID format.
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "404":
+          description: Sides not found with the specified ID.
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get a Single Side Dish
+      tags:
+      - sides
+    put:
+      consumes:
+      - application/json
+      description: Updates the details of an existing side dish identified by their
+        ID.
+      parameters:
+      - description: Side ID
+        format: int64
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated Sides Details
+        in: body
+        name: sides
+        required: true
+        schema:
+          $ref: '#/definitions/models.Sides'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: The updated side's details.
+          schema:
+            $ref: '#/definitions/models.Sides'
+        "400":
+          description: Invalid input format for user details or invalid sides ID.
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Internal server error while updating the sides.
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Update a Side Dish
+      tags:
+      - sides
+  /users:
+    get:
+      description: Retrieves a list of all users in the system.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: An array of user objects.
+          schema:
+            items:
+              $ref: '#/definitions/models.User'
+            type: array
+        "500":
+          description: Internal server error while fetching users.
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get All Users
+      tags:
+      - user
+    post:
+      consumes:
+      - application/json
+      description: Adds a new user to the system with the provided details.
+      parameters:
+      - description: User Registration Details
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: The created user's details, including their unique identifier.
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Invalid input format for user details.
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Internal server error while creating the user.
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Create a New User
+      tags:
+      - user
+  /users/{id}:
+    delete:
+      description: Removes a user from the system by their unique identifier.
+      parameters:
+      - description: User ID
+        format: int64
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: User successfully deleted, no content to return.
+        "400":
+          description: Invalid user ID format.
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Internal server error while deleting the user.
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Delete a User
+      tags:
+      - user
+    get:
+      description: Retrieves details of a single user by their unique identifier.
+      parameters:
+      - description: User ID
+        format: int64
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: The details of the user including ID, name, email, telephone,
+            and role.
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Invalid user ID format.
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "404":
+          description: User not found with the specified ID.
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get a Single User
+      tags:
+      - user
+    put:
+      consumes:
+      - application/json
+      description: Updates the details of an existing user identified by their ID.
+      parameters:
+      - description: User ID
+        format: int64
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated User Details
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: The updated user's details.
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Invalid input format for user details or invalid user ID.
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Internal server error while updating the user.
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Update a User
+      tags:
+      - user
+  /users/{userId}/reservations:
+    get:
+      description: Retrieves a list of reservations associated with a specific user.
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: An array of reservation objects for the user.
+          schema:
+            items:
+              $ref: '#/definitions/models.Reservation'
+            type: array
+        "400":
+          description: Invalid user ID format.
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "404":
+          description: Reservations not found for the specified user ID.
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get User's Reservations
+      tags:
+      - reservation
+swagger: "2.0"
