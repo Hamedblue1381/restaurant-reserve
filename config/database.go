@@ -15,7 +15,7 @@ func SetupDBConnection() *gorm.DB {
 		log.Fatal("Failed to connect to database!")
 	}
 
-	db.AutoMigrate(&models.User{}, &models.Food{}, &models.Sides{}, &models.Category{}, &models.MealType{})
+	db.AutoMigrate(&models.User{}, &models.Food{}, &models.Sides{}, &models.Category{}, &models.MealType{}, &models.Reservation{})
 
 	return db
 }
