@@ -69,6 +69,7 @@ func Register(c *gin.Context) {
 }
 
 type LoginDetails struct {
+	// Telephone string `json:"telephone" example:"09211212121"`
 	Email    string `json:"email" example:"user@example.com"`
 	Password string `json:"password" example:"password123"`
 }

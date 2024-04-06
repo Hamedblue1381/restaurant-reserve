@@ -12,12 +12,12 @@ import (
 var sidesHandler *models.SidesHandler
 
 func InitializedSidesHandler(db *gorm.DB) {
-	foodHandler = models.NewSidesHandler(db)
+	sidesHandler = models.NewSidesHandler(db)
 }
 
 // @Summary Get a Single Side Dish
 // @Description Retrieves details of a single side dish by their unique identifier.
-// @Tags side
+// @Tags sides
 // @Produce json
 // @Param id path int true "Sides ID" Format(int64)
 // @Security Bearer
@@ -36,7 +36,7 @@ func GetSide(c *gin.Context) {
 
 	idUint := uint(idInt)
 
-	user, err := foodHandler.GetSide(idUint)
+	user, err := sidesHandler.GetSide(idUint)
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Side Dish not found"})
@@ -48,14 +48,14 @@ func GetSide(c *gin.Context) {
 
 // @Summary Get All Sides
 // @Description Retrieves a list of all side dishes in the system.
-// @Tags user
+// @Tags sides
 // @Produce json
 // @Security Bearer
 // @Success 200 {array} models.Sides "An array of sides objects."
 // @Failure 500 {object} ErrorResponse "Internal server error while fetching sides."
 // @Router /sides [get]
 func GetSides(c *gin.Context) {
-	sides, err := foodHandler.GetSides()
+	sides, err := sidesHandler.GetSides()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching sides!"})
 		return
@@ -83,7 +83,7 @@ func CreateSides(c *gin.Context) {
 		return
 	}
 
-	if err := foodHandler.CreateSides(&side); err != nil {
+	if err := sidesHandler.CreateSides(&side); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating side dish!"})
 		return
 	}
@@ -119,7 +119,7 @@ func UpdateSides(c *gin.Context) {
 		return
 	}
 
-	err = foodHandler.UpdateSides(idUint, &side)
+	err = sidesHandler.UpdateSides(idUint, &side)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error updating side dish"})
 		return
@@ -137,7 +137,7 @@ func UpdateSides(c *gin.Context) {
 // @Success 204 "Side Dish successfully deleted, no content to return."
 // @Failure 400 {object} ErrorResponse "Invalid sides ID format."
 // @Failure 500 {object} ErrorResponse "Internal server error while deleting the sides."
-// @Router /users/{id} [delete]
+// @Router /sides/{id} [delete]
 func DeleteSides(c *gin.Context) {
 	idString := c.Param("id")
 	idInt, err := strconv.Atoi(idString)
@@ -147,7 +147,7 @@ func DeleteSides(c *gin.Context) {
 	}
 	idUint := uint(idInt)
 
-	err = foodHandler.DeleteSides(idUint)
+	err = sidesHandler.DeleteSides(idUint)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error deleting sides"})
 		return

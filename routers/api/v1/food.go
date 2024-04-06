@@ -48,12 +48,12 @@ func GetFood(c *gin.Context) {
 
 // @Summary Get All Foods
 // @Description Retrieves a list of all foods in the system.
-// @Tags user
+// @Tags food
 // @Produce json
 // @Security Bearer
 // @Success 200 {array} models.Food "An array of food objects."
 // @Failure 500 {object} ErrorResponse "Internal server error while fetching foods."
-// @Router /foods [get]
+// @Router /food [get]
 func GetFoods(c *gin.Context) {
 	foods, err := foodHandler.GetFoods()
 	if err != nil {
@@ -130,7 +130,7 @@ func UpdateFood(c *gin.Context) {
 
 // @Summary Delete a food
 // @Description Removes a food dish from the system by their unique identifier.
-// @Tags foods
+// @Tags food
 // @Produce json
 // @Param id path int true "food ID" Format(int64)
 // @Security Bearer
