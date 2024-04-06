@@ -3,10 +3,10 @@ package models
 import "gorm.io/gorm"
 
 type Sides struct {
-	ID         uint   `gorm:"primaryKey"`
-	Name       string `json:"name"`
-	Quantity   string `json:"quantity"`
-	gorm.Model `json:"-" swaggerignore:"true"`
+	ID           uint          `gorm:"primaryKey"`
+	Name         string        `json:"name"`
+	Quantity     string        `json:"quantity"`
+	gorm.Model   `json:"-" swaggerignore:"true"`
 }
 
 type SidesHandler struct {

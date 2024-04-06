@@ -52,7 +52,7 @@ func (r *ReservationHandler) ListReservations(startDate, endDate time.Time) ([]R
 		query = query.Where("date <= ?", endDate)
 	}
 
-	result := query.Find(&reservations)
+	result := query.Preload("User").Preload("Food").Preload("Side").Find(&reservations)
 	return reservations, result.Error
 }
 

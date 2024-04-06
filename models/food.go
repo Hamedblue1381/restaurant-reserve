@@ -5,14 +5,14 @@ import (
 )
 
 type Food struct {
-	ID         uint     `gorm:"primaryKey"`
-	Name       string   `json:"name"`
-	Quanity    string   `json:"quanity"`
-	CategoryID uint     // Foreign key for Category
-	Category   Category `json:"category"` // Category relationship
-	MealTypeID uint     // Foreign key for MealType
-	MealType   MealType `json:"meal_type"` // MealType relationship
-	gorm.Model `json:"-" swaggerignore:"true"`
+	ID           uint          `gorm:"primaryKey"`
+	Name         string        `json:"name"`
+	Quanity      string        `json:"quanity"`
+	CategoryID   uint          // Foreign key for Category
+	Category     Category      `json:"category"` // Category relationship
+	MealTypeID   uint          // Foreign key for MealType
+	MealType     MealType      `json:"meal_type"` // MealType relationship
+	gorm.Model   `json:"-" swaggerignore:"true"`
 }
 
 type FoodHandler struct {

@@ -1,11 +1,14 @@
 package v1
 
 import (
+	"fmt"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/Hamedblue1381/restaurant-reserve/models"
 	"github.com/gin-gonic/gin"
+	"github.com/skip2/go-qrcode"
 	"gorm.io/gorm"
 )
 
@@ -170,11 +173,42 @@ func DeleteUser(c *gin.Context) {
 // @Failure 404 {object} ErrorResponse "User not found."
 // @Router /me [get]
 func GetMe(c *gin.Context) {
-	id, _ := c.Get("id")
-	user, err := userHandler.GetUser(id.(uint))
+	userId, _ := c.Get("id")
+	if userId == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User must be logged in to view reservations"})
+		return
+	}
+	user, err := userHandler.GetUser(userId.(uint))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
 	c.JSON(http.StatusOK, user)
+}
+
+// @Summary Get my profile QR CODE
+// @Description Retrieves the QR Code of the currently authenticated user.
+// @Tags user
+// @Produce json
+// @Security Bearer
+// @Success 200 {object} models.User "The QR CODE of the currently authenticated user."
+// @Failure 404 {object} ErrorResponse "User not found."
+// @Router /me/qr [get]
+func GetMeQR(c *gin.Context) {
+	userId, _ := c.Get("id")
+	if userId == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User must be logged in to view reservations"})
+		return
+	}
+	urlToUser := fmt.Sprintf("http://%s/api/v1/users/%v", os.Getenv("BASE_URL"), userId)
+
+	// Generate QR code
+	qrCode, err := qrcode.Encode(urlToUser, qrcode.Medium, 256)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate QR code"})
+		return
+	}
+
+	// Return QR code as response
+	c.Data(http.StatusOK, "image/png", qrCode)
 }

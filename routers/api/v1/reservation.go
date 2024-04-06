@@ -10,6 +10,11 @@ import (
 	"gorm.io/gorm"
 )
 
+type SuccessResponse struct {
+	Message string    `json:"message"`
+	Date    time.Time `json:"date"`
+}
+
 var reservationHandler *models.ReservationHandler
 
 func InitializeReservationHandler(db *gorm.DB) {
@@ -23,7 +28,7 @@ func InitializeReservationHandler(db *gorm.DB) {
 // @Produce json
 // @Param reservation body models.Reservation true "Reservation details"
 // @Security Bearer
-// @Success 200 {object} models.Reservation "The created reservation"
+// @Success 200 {object} SuccessResponse "The created reservation's date"
 // @Failure 403 {object} ErrorResponse "User must be logged in to update a reservation"
 // @Failure 400 {object} ErrorResponse "Invalid request format"
 // @Failure 500 {object} ErrorResponse "Internal server error"
@@ -53,7 +58,10 @@ func CreateReservation(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, reservation)
+	c.JSON(http.StatusOK, SuccessResponse{
+		Message: "Reservation created successfully",
+		Date:    reservation.Date,
+	})
 }
 
 // @Summary Delete a reservation

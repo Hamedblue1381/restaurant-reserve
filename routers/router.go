@@ -32,24 +32,22 @@ func UseRouter() *gin.Engine {
 	apiv1.Use(middleware.Auth())
 	{
 		// for authorized user
-		apiv1.GET("/reservations", middleware.Reserve(), v1.GetReservations)
-		apiv1.GET("/reservations/:id", middleware.Reserve(), v1.GetReservation)
+		apiv1.GET("/reservations", middleware.IsAuthorized(), v1.GetReservations)
+		apiv1.GET("/reservations/:id", middleware.IsAuthorized(), v1.GetReservation)
 		apiv1.GET("/food", v1.GetFoods)
 		apiv1.GET("/food:id", v1.GetFood)
 		apiv1.GET("/sides", v1.GetSides)
 		apiv1.GET("/sides/:id", v1.GetSide)
 		apiv1.GET("/mealtype", v1.GetMealTypes)
 		apiv1.GET("/mealtype/:id", v1.GetMealType)
-		apiv1.GET("/users", v1.GetUsers)
-		apiv1.GET("/me", v1.GetMe)
+		apiv1.GET("/me", middleware.IsAuthorized(), v1.GetMe)
+		apiv1.GET("/me/qr", middleware.IsAuthorized(), v1.GetMeQR)
 		apiv1.GET("/users/:id", v1.GetUser)
-		// apiv1.GET("/users/:id/reservations", middleware.Reserve(), v1.GetUserReservations)
-		apiv1.POST("/reservations", middleware.Reserve(), v1.CreateReservation)
-		apiv1.PUT("/reservations/:id", middleware.Reserve(), v1.UpdateReservation)
-		apiv1.DELETE("/reservations/:id", middleware.Reserve(), v1.DeleteReservation)
-		apiv1.POST("/users", v1.CreateUser)
-		apiv1.PUT("/users/:id", v1.UpdateUser)
-		apiv1.DELETE("/users/:id", v1.DeleteUser)
+		apiv1.GET("/users/:id/reservations", middleware.IsAuthorized(), v1.GetUserReservations)
+		apiv1.POST("/reservations", middleware.IsAuthorized(), v1.CreateReservation)
+		apiv1.PUT("/reservations/:id", middleware.IsAuthorized(), v1.UpdateReservation)
+		apiv1.DELETE("/reservations/:id", middleware.IsAuthorized(), v1.DeleteReservation)
+
 		// for admin
 		adminRoutes := apiv1.Group("/")
 		adminRoutes.Use(middleware.Admin())
@@ -58,9 +56,18 @@ func UseRouter() *gin.Engine {
 			adminRoutes.PUT("/food/:id", v1.UpdateFood)
 			adminRoutes.DELETE("/food/:id", v1.UpdateFood)
 
+			apiv1.PUT("/users/:id", v1.UpdateUser)
+			apiv1.DELETE("/users/:id", v1.DeleteUser)
+			apiv1.POST("/users", v1.CreateUser)
+			apiv1.GET("/users", v1.GetUsers)
+
 			adminRoutes.POST("/sides", v1.CreateSides)
 			adminRoutes.PUT("/sides/:id", v1.UpdateSides)
 			adminRoutes.DELETE("/sides/:id", v1.DeleteSides)
+
+			apiv1.POST("/mealtype", v1.CreateMealType)
+			apiv1.PUT("/mealtype/:id", v1.UpdateMealType)
+			apiv1.DELETE("/mealtype/:id", v1.DeleteMealType)
 		}
 	}
 	return r

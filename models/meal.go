@@ -5,6 +5,7 @@ import "gorm.io/gorm"
 type MealType struct {
 	ID         uint   `gorm:"primaryKey"`
 	Name       string `json:"name"`
+	Foods      []Food `gorm:"foreignKey:MealTypeID"`
 	gorm.Model `json:"-" swaggerignore:"true"`
 }
 
