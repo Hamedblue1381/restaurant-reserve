@@ -379,6 +379,37 @@ const docTemplate = `{
                 }
             }
         },
+        "/me/qr": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Retrieves the QR Code of the currently authenticated user.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Get my profile QR CODE",
+                "responses": {
+                    "200": {
+                        "description": "The QR CODE of the currently authenticated user.",
+                        "schema": {
+                            "$ref": "#/definitions/models.User"
+                        }
+                    },
+                    "404": {
+                        "description": "User not found.",
+                        "schema": {
+                            "$ref": "#/definitions/v1.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/mealtype": {
             "post": {
                 "security": [
@@ -641,9 +672,9 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "The created reservation",
+                        "description": "The created reservation's date",
                         "schema": {
-                            "$ref": "#/definitions/models.Reservation"
+                            "$ref": "#/definitions/v1.SuccessResponse"
                         }
                     },
                     "400": {
@@ -1538,12 +1569,24 @@ const docTemplate = `{
                 },
                 "quanity": {
                     "type": "string"
+                },
+                "reservations": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Reservation"
+                    }
                 }
             }
         },
         "models.MealType": {
             "type": "object",
             "properties": {
+                "foods": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Food"
+                    }
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -1610,6 +1653,12 @@ const docTemplate = `{
                 },
                 "quantity": {
                     "type": "string"
+                },
+                "reservations": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Reservation"
+                    }
                 }
             }
         },
@@ -1628,6 +1677,12 @@ const docTemplate = `{
                 "password": {
                     "type": "string"
                 },
+                "reservations": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Reservation"
+                    }
+                },
                 "role": {
                     "type": "string"
                 },
@@ -1642,6 +1697,17 @@ const docTemplate = `{
                 "error": {
                     "type": "string",
                     "example": "Description of the error occurred"
+                }
+            }
+        },
+        "v1.SuccessResponse": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
                 }
             }
         }

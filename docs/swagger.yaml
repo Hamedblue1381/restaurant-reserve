@@ -82,9 +82,17 @@ definitions:
         type: string
       quanity:
         type: string
+      reservations:
+        items:
+          $ref: '#/definitions/models.Reservation'
+        type: array
     type: object
   models.MealType:
     properties:
+      foods:
+        items:
+          $ref: '#/definitions/models.Food'
+        type: array
       id:
         type: integer
       name:
@@ -126,6 +134,10 @@ definitions:
         type: string
       quantity:
         type: string
+      reservations:
+        items:
+          $ref: '#/definitions/models.Reservation'
+        type: array
     type: object
   models.User:
     properties:
@@ -137,6 +149,10 @@ definitions:
         type: string
       password:
         type: string
+      reservations:
+        items:
+          $ref: '#/definitions/models.Reservation'
+        type: array
       role:
         type: string
       telephone:
@@ -146,6 +162,13 @@ definitions:
     properties:
       error:
         example: Description of the error occurred
+        type: string
+    type: object
+  v1.SuccessResponse:
+    properties:
+      date:
+        type: string
+      message:
         type: string
     type: object
 info:
@@ -388,6 +411,25 @@ paths:
       summary: Get my profile
       tags:
       - user
+  /me/qr:
+    get:
+      description: Retrieves the QR Code of the currently authenticated user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: The QR CODE of the currently authenticated user.
+          schema:
+            $ref: '#/definitions/models.User'
+        "404":
+          description: User not found.
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get my profile QR CODE
+      tags:
+      - user
   /mealtype:
     post:
       consumes:
@@ -553,9 +595,9 @@ paths:
       - application/json
       responses:
         "200":
-          description: The created reservation
+          description: The created reservation's date
           schema:
-            $ref: '#/definitions/models.Reservation'
+            $ref: '#/definitions/v1.SuccessResponse'
         "400":
           description: Invalid request format
           schema:
