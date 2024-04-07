@@ -49,6 +49,13 @@ func CreateReservation(c *gin.Context) {
 
 	// Convert user ID to uint
 	userIdUint, _ := userId.(uint)
+	// Check if user has more than 3 unpaid reservations
+
+	if err := reservationHandler.IsBlackListed(userIdUint); err != nil {
+		c.JSON(http.StatusForbidden, gin.H{"error": err})
+		c.Abort()
+		return
+	}
 
 	// Set user ID for the reservation
 	reservation.UserID = userIdUint

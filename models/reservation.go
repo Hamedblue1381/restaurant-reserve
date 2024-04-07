@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"time"
 
 	"gorm.io/gorm"
@@ -15,6 +16,7 @@ type Reservation struct {
 	SideID     uint      // Foreign key for Sides
 	Side       Sides     `json:"side"` // Sides relationship
 	Date       time.Time `json:"date"`
+	IsPaid     bool      `json:"-"`
 	gorm.Model `json:"-" swaggerignore:"true"`
 }
 
@@ -37,6 +39,17 @@ func (r *ReservationHandler) DeleteReservation(id uint) error {
 
 func (r *ReservationHandler) UpdateReservation(id uint, reservation *Reservation) error {
 	result := r.db.Model(&Reservation{}).Where("id = ?", id).Updates(reservation)
+	return result.Error
+}
+
+func (r *ReservationHandler) IsBlackListed(id uint) error {
+	var count int64
+	result := r.db.Model(&Reservation{}).Where("user_id = ? AND is_paid = ?", id, false).Count(&count)
+
+	if count > 3 {
+		return errors.New("User is blacklisted due to having more than 3 unpaid reservations")
+	}
+
 	return result.Error
 }
 
